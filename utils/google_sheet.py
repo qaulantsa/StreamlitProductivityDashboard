@@ -1,6 +1,8 @@
 import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
+import json
+import tempfile
 
 # Scope akses untuk Google Sheets dan Google Drive
 scope = [
@@ -10,12 +12,16 @@ scope = [
 ]
 
 # -------------------------------
-# Fungsi untuk koneksi ke Google Sheet
+# Fungsi untuk koneksi ke Google Sheet (pakai kredensial dict dari st.secrets)
 # -------------------------------
-def connect_gsheet(json_keyfile: str, sheet_name: str):
-    creds = ServiceAccountCredentials.from_json_keyfile_name(json_keyfile, scope)
-    client = gspread.authorize(creds)
-    sheet = client.open(sheet_name).sheet1  # akses worksheet pertama
+def connect_gsheet(creds_dict: dict, sheet_name: str):
+    # Simpan kredensial sementara dalam file temp
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".json") as tmp:
+        json.dump(creds_dict, tmp)
+        tmp.flush()
+        creds = ServiceAccountCredentials.from_json_keyfile_name(tmp.name, scope)
+        client = gspread.authorize(creds)
+        sheet = client.open(sheet_name).sheet1
     return sheet
 
 # -------------------------------

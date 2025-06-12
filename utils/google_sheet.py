@@ -1,12 +1,11 @@
 import gspread
 import pandas as pd
-from oauth2client.service_account import ServiceAccountCredentials
 import json
 import tempfile
+from google.oauth2.service_account import Credentials
 
-# Scope akses untuk Google Sheets dan Google Drive
+
 scope = [
-    "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
@@ -14,18 +13,11 @@ scope = [
 # -------------------------------
 # Fungsi untuk koneksi ke Google Sheet (pakai kredensial dict dari st.secrets)
 # -------------------------------
-def connect_gsheet(creds_dict: dict, sheet_name: str):
-    # Ubah menjadi dict biasa
+def connect_gsheet(creds_dict, sheet_name: str):
     creds_dict = dict(creds_dict)
-
-    # Simpan kredensial sementara dalam file temp
-    with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".json") as tmp:
-        json.dump(creds_dict, tmp)
-        tmp.flush()
-        creds = ServiceAccountCredentials.from_json_keyfile_name(tmp.name, scope)
-        client = gspread.authorize(creds)
-        sheet = client.open(sheet_name).sheet1
-    return sheet
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+    client = gspread.authorize(creds)
+    return client.open(sheet_name).sheet1
 
 # -------------------------------
 # Fungsi untuk mengambil data dari Sheet sebagai DataFrame

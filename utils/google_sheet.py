@@ -15,6 +15,9 @@ scope = [
 # Fungsi untuk koneksi ke Google Sheet (pakai kredensial dict dari st.secrets)
 # -------------------------------
 def connect_gsheet(creds_dict: dict, sheet_name: str):
+    # Ubah menjadi dict biasa
+    creds_dict = dict(creds_dict)
+
     # Simpan kredensial sementara dalam file temp
     with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".json") as tmp:
         json.dump(creds_dict, tmp)
